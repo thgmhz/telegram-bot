@@ -5,12 +5,11 @@
   "description": "I created this simple bot to manage my groups on Telegram.",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js",
+    "start": "nodemon index.js"
   },
-  "author": "",
   "license": "ISC",
   "dependencies": {
-    "dotenv": "^8.2.0"
+    "dotenv": "^8.2.0",
     "telegraf": "3.37.0"
   },
   "devDependencies": {
