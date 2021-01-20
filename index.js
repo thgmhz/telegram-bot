@@ -18,7 +18,7 @@ const App = {
   },
 
   getRandomCaptcha() {
-    const randomNumber = Math.floor(Math.random() * captcha.length) + 0
+    const randomNumber = Math.floor(Math.random() * captcha.length + 1) + 0
 
     return captcha[randomNumber]
   },
@@ -88,7 +88,7 @@ const App = {
           id, 
           message: `🚨 ${first_name} foi removido(a) por não digitar o código dentro do tempo limite.`
         })
-      , 100000)
+      , 180000)
       
       this.usersInCaptcha.push({ 
         id, 
