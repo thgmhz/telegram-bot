@@ -27,8 +27,34 @@ const App = {
   },
 
   bindEvents() {
+    bot.command('startAutoMsgs', this.startAutoMessages)
+    bot.command('stopAutoMsgs', this.stopAutoMessages)
     bot.on('new_chat_members', this.Events.onMemberEnter.bind(this))
     bot.on('message', this.Events.onNewMessage.bind(this))
+  },
+
+  startAutoMessages(ctx) {
+    ctx.reply('Nunca deixe de sonhar 🇵🇹')
+
+    this.mmp = setInterval(() => {
+      ctx.reply(`Vcs conhecem o Método Morar em Portugal? 🇵🇹\n\nLá tem todas informações que você precisa para imigrar com segurança!\n\nClique neste link para saber mais: http://bit.ly/388mjha`)
+    }, 86400000) // 1 day
+
+    this.m1 = setInterval(() => {
+      ctx.reply(`Você tem que acordar todos os dias e dizer para si mesmo(a):\n\n"Eu posso, eu consigo, eu vou morar em Portugal! 🇵🇹\n\nContinue acreditando!`)
+    }, 259200000) // 3 day
+
+    this.m2 = setInterval(() => {
+      ctx.reply(`O poder está dentro de você, na sua mente, pois se acreditar que consegue não haverá obstáculo capaz de impedir o seu sucesso! Força! 🇵🇹`)
+    }, 432000000) // 5 day
+  },
+
+  stopAutoMessages(ctx) {
+    ctx.reply('Portugal é um país maravilhoso, vcs não acham?! 🇵🇹')
+    
+    clearInterval(this.mmp)
+    clearInterval(this.m1)
+    clearInterval(this.m2)
   },
 
   getRandomCaptcha() {
