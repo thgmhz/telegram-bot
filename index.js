@@ -4,12 +4,19 @@ const express = require('express')
 const Telegraf = require('telegraf')
 const captcha = require('./captcha.js')
 
-const bot = new Telegraf(process.env.TOKEN)
-
 // only to run in heroku
 const app = express()
+
 app.set('port', (process.env.PORT || 5000))
 
+app.get('/', (request, response) =>  response.send('App is running'))
+
+app.listen(app.get('port'), () => 
+  console.log('App is running, server is listening on port:', app.get('port')))
+
+
+// bot
+const bot = new Telegraf(process.env.TOKEN)
 
 const App = {
   usersInCaptcha: [],
