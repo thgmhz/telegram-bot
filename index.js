@@ -33,31 +33,38 @@ const App = {
     }
   },
 
+  deleteMessages(ctx, messagesId) {
+    messagesId.forEach(id => ctx.deleteMessage(id))
+  },
+
   removeUserFromCaptchaList(id) {
     this.usersInCaptcha = this.usersInCaptcha.filter(user => user.id !== id)
   },
 
   Events: {
-    onNewMessage(ctx) {
+    async onNewMessage(ctx) {
       const { message } = ctx
       const { from, text } = message
       
       const user = this.usersInCaptcha.find(user => user.id === from.id)
 
       if (user) {
-        if (text === user.captcha.code) {
+        if (text == user.captcha.code) {
           this.removeUserFromCaptchaList(user.id)
-          ctx.reply(`👍 ${user.userString} não é um robô, pode ficar no grupo :)`)
-          ctx.reply(`${user.userString}, não esqueça de ler as regras na mensagem fixada no topo do grupo.`)        
+          await ctx.reply(`👍 ${user.userString} não é um robô, pode ficar no grupo :)`)
+          await ctx.reply(`${user.userString}, não esqueça de ler as regras na mensagem fixada no topo do grupo.`)                  
         } else {
           this.kickUserInCaptcha({
             ctx, 
             id: user.id, 
             message: `🚨 ${user.userString} não digitou o captcha corretamente e foi removido(a)!`
           })
-        }
+          
+        }        
+        
+        if (message && message.message_id) user.messagesToDelete.push(message.message_id)
 
-        user.messagesToDelete.forEach(messageId => ctx.deleteMessage(messageId))
+        this.deleteMessages(ctx, user.messagesToDelete)
       }
     },
     
@@ -74,7 +81,7 @@ const App = {
       
       const captcha = this.getRandomCaptcha()
 
-      ctx.reply(`💛 ${first_name} entrou do grupo!`)
+      await ctx.reply(`💛 ${userString} entrou do grupo!`)
 
       const msg = await ctx.reply(`
         Olá ${userString}!\n\nSeja bem-vindo(a) ao grupo Morar em Portugal 🇵🇹!\n\nATENÇÃO: Para garantir que você não é um robô, envie uma mensagem com os números que aparecem na imagem abaixo. Se a mensagem não for enviada em até 3 minutos você será removido(a) do grupo automaticamente.
@@ -82,19 +89,23 @@ const App = {
 
       const msgImg = await ctx.replyWithPhoto({ source: `./images/${captcha.image}` })
 
-      setTimeout(() => 
+      const messagesToDelete = [msg.message_id, msgImg.message_id] 
+
+      setTimeout(() => {
+        this.deleteMessages(ctx, messagesToDelete)
+
         this.kickUserInCaptcha({
           ctx, 
           id, 
-          message: `🚨 ${first_name} foi removido(a) por não digitar o código dentro do tempo limite.`
+          message: `🚨 ${userString} foi removido(a) por não digitar o código dentro do tempo limite.`
         })
-      , 180000)
+      }, 180000)
       
       this.usersInCaptcha.push({ 
         id, 
         userString,
         captcha,
-        messagesToDelete: [msg.message_id, msgImg.message_id],
+        messagesToDelete,
       })      
     }
   }
