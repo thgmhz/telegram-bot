@@ -58,7 +58,7 @@ const App = {
   },
 
   getRandomCaptcha() {
-    const randomNumber = Math.floor(Math.random() * captcha.length + 1) + 0
+    const randomNumber = Math.floor(Math.random() * captcha.length) + 0
 
     return captcha[randomNumber]
   },
@@ -119,7 +119,7 @@ const App = {
       if (last_name) userString += ` ${last_name}`
       if (username) userString += ` (@${username})`
       
-      const captcha = this.getRandomCaptcha()
+      const captcha = this.getRandomCaptcha() || captcha[0]
 
       await ctx.reply(`💛 ${userString} entrou do grupo!`)
 
