@@ -1,8 +1,15 @@
-require('dotenv').config();
-const Telegraf  = require('telegraf')
+require('dotenv').config()
+
+const express = require('express')
+const Telegraf = require('telegraf')
 const captcha = require('./captcha.js')
 
 const bot = new Telegraf(process.env.TOKEN)
+
+// only to run in heroku
+const app = express()
+app.set('port', (process.env.PORT || 5000))
+
 
 const App = {
   usersInCaptcha: [],
