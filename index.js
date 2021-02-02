@@ -74,7 +74,9 @@ const App = {
   },
 
   deleteMessages(ctx, messagesId) {
-    messagesId.forEach(id => ctx.deleteMessage(id))
+    messagesId.forEach(id => {
+      if (id) ctx.deleteMessage(id).catch(console.log)
+    })
   },
 
   removeUserFromCaptchaList(id) {
