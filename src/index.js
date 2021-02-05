@@ -1,15 +1,22 @@
 require('dotenv').config()
 
+const Telegraf = require('telegraf')
 const { Composer } = require('micro-bot')
 const path = require('path')
 const captcha = require('./captcha.js')
 
-const bot = new Composer
+const isDev = process.argv[2] === 'isDev' || false
+
+const bot = isDev
+  ? new Telegraf(process.env.BOT_TOKEN)
+  : new Composer
 
 const App = {
   usersInCaptcha: [],
 
   init() {
+    isDev && bot.launch()
+
     bot.on('new_chat_members', this.Events.onMemberEnter.bind(this))
     bot.on('message', this.Events.onNewMessage.bind(this))
   },  
@@ -55,8 +62,14 @@ const App = {
       if (user) {
         if (text.toLowerCase() == user.captcha.code.toLowerCase()) {
           this.removeUserFromCaptchaList(user.id)
+          
           await ctx.reply(`👍 Ok, ${user.userString} não é um robô.`)
-          await ctx.reply(`${user.userString}, não esqueça de ler as regras na mensagem fixada no topo do grupo.`)          
+          await ctx.reply(`${user.userString}, seja bem-vindo(a)!\n\nNão esqueça de ler as regras na mensagem fixada no topo do grupo.`)
+          
+          if (message && message.message_id) {
+            user.messagesToDelete.push(message.message_id)
+          }
+
           this.deleteMessages(ctx, user.messagesToDelete)
         } else {
           user.attempt -= 1
@@ -91,6 +104,8 @@ const App = {
     },
     
     async onMemberEnter(ctx) {
+      console.log('#### onMemberEnter')
+
       const { message } = ctx
       const { new_chat_participant } = message
       const { id, first_name, last_name, username } = new_chat_participant
@@ -108,8 +123,11 @@ const App = {
       const msg_welcome = await ctx.replyWithPhoto({ 
         source: path.join(__dirname, `/images/${captcha.image}`)
       }, { 
-        caption: `Olá ${userString}!\n\nSeja bem-vindo(a) ao grupo!\n\nATENÇÃO: Para garantir que você não é um robô de spam, envie uma mensagem com as letras e números que aparecem na imagem acima. Você tem 3 tentativas.\n\nSe as tentativas não forem feitas dentro de 3 minutos você será removido(a) do grupo automaticamente.`
+        caption: `Olá ${userString}!\n\nATENÇÃO: Para garantir que você não é um robô de spam, envie uma mensagem com as letras e números que aparecem na imagem acima.\n\nVocê tem 3 tentativas.\n\nMaiúsculas e minúsculas fazem diferença.\n\nSe as tentativas não forem feitas dentro de 3 minutos você será removido(a) do grupo automaticamente.`
       })
+
+      console.log('##### msg_welcome', msg_welcome)
+      console.log('##### msg_welcome.message_id', msg_welcome.message_id)
       
       const messagesToDelete = [msg_welcome.message_id] 
 
@@ -138,7 +156,6 @@ const App = {
 }
 
 App.init()
-
 
 module.exports = bot
 
