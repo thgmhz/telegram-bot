@@ -1,6 +1,7 @@
 require('dotenv').config()
 
 const { Composer } = require('micro-bot')
+const path = require('path')
 const captcha = require('./captcha.js')
 
 const bot = new Composer
@@ -104,7 +105,11 @@ const App = {
 
       const captcha = this.getRandomCaptcha() || captcha[0]
 
-      const msg_welcome = await ctx.replyWithPhoto({ source: `./images/${captcha.image}` }, { caption: `Olá ${userString}!\n\nSeja bem-vindo(a) ao grupo!\n\nATENÇÃO: Para garantir que você não é um robô de spam, envie uma mensagem com as letras e números que aparecem na imagem acima. Você tem 3 tentativas.\n\nSe as tentativas não forem feitas dentro de 3 minutos você será removido(a) do grupo automaticamente.` })
+      const msg_welcome = await ctx.replyWithPhoto({ 
+        source: path.join(__dirname, `/images/${captcha.image}`)
+      }, { 
+        caption: `Olá ${userString}!\n\nSeja bem-vindo(a) ao grupo!\n\nATENÇÃO: Para garantir que você não é um robô de spam, envie uma mensagem com as letras e números que aparecem na imagem acima. Você tem 3 tentativas.\n\nSe as tentativas não forem feitas dentro de 3 minutos você será removido(a) do grupo automaticamente.`
+      })
       
       const messagesToDelete = [msg_welcome.message_id] 
 
