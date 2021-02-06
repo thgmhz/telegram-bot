@@ -1,30 +1,37 @@
 const { Composer } = require('micro-bot')
-const Telegraf = require('telegraf')
+const { Telegraf , session } = require('telegraf')
 const path = require('path')
 
 const captchaList = require('./captcha')
+const { stage, onStart } = require('./userInterface')
 
 class Bot {
   constructor({ token, isDev }) {
     this.bot = isDev
       ? new Telegraf(token)
       : new Composer
+
+    this.bot.use(session())
+    this.bot.use(stage.middleware())
     
     if (isDev) this.bot.launch()
-
-    this.isDev = isDev
+    
     this.maxAttempts = 3
-    this.strictCase = false
+    this.sensitiveCase = false
     this.usersBlacklist = []
     this.captchaTimeout = 180000
   }
-
-  init({ username, maxAttempts, captchaTimeout, strictCase }) {
-    this.botUsername = username
+  
+  init({ botUsername, maxAttempts, captchaTimeout, sensitiveCase }) {
+    this.botUsername = botUsername
     this.maxAttempts = maxAttempts || this.maxAttempts
     this.captchaTimeout = captchaTimeout || this.captchaTimeout
-    this.strictCase = strictCase
+    this.sensitiveCase = sensitiveCase
+    this.bindEvents()
+  }
 
+  bindEvents() {    
+    this.bot.start(onStart)
     this.bot.on('new_chat_members', this.onNewChatMembers.bind(this))
     this.bot.on('message', this.onNewMessage.bind(this))
   }
@@ -239,7 +246,7 @@ class Bot {
       const { captcha } = userInBlacklist
       const { code } = captcha
 
-      const userSolvedCaptcha = this.strictCase
+      const userSolvedCaptcha = this.sensitiveCase
         ? (text === code)
         : (text.toLowerCase() === code.toLowerCase())
 
