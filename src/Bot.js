@@ -1,5 +1,5 @@
 const { Composer } = require('micro-bot')
-const Telegraf = require('telegraf')
+const { Telegraf } = require('telegraf')
 const path = require('path')
 
 const captchaList = require('./captcha')
@@ -24,7 +24,10 @@ class Bot {
     this.maxAttempts = maxAttempts || this.maxAttempts
     this.captchaTimeout = captchaTimeout || this.captchaTimeout
     this.sensitiveCase = sensitiveCase
+    this.bindEvents()
+  }
 
+  bindEvents() {
     this.bot.on('new_chat_members', this.onNewChatMembers.bind(this))
     this.bot.on('message', this.onNewMessage.bind(this))
   }
