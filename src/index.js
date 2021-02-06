@@ -16,10 +16,10 @@ bot.setMessages({
 })
 
 bot.init({
-  username: 'TugaBot_bot',
+  botUsername: 'TugaBot_bot',
   captchaTimeout: 60000 * 5,
   maxAttempts: 3,
-  strictCase: false,
+  sensitiveCase: false,
 })
 
 module.exports = bot

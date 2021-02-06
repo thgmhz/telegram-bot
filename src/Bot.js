@@ -14,16 +14,16 @@ class Bot {
 
     this.isDev = isDev
     this.maxAttempts = 3
-    this.strictCase = false
+    this.sensitiveCase = false
     this.usersBlacklist = []
     this.captchaTimeout = 180000
   }
 
-  init({ username, maxAttempts, captchaTimeout, strictCase }) {
-    this.botUsername = username
+  init({ botUsername, maxAttempts, captchaTimeout, sensitiveCase }) {
+    this.botUsername = botUsername
     this.maxAttempts = maxAttempts || this.maxAttempts
     this.captchaTimeout = captchaTimeout || this.captchaTimeout
-    this.strictCase = strictCase
+    this.sensitiveCase = sensitiveCase
 
     this.bot.on('new_chat_members', this.onNewChatMembers.bind(this))
     this.bot.on('message', this.onNewMessage.bind(this))
@@ -239,7 +239,7 @@ class Bot {
       const { captcha } = userInBlacklist
       const { code } = captcha
 
-      const userSolvedCaptcha = this.strictCase
+      const userSolvedCaptcha = this.sensitiveCase
         ? (text === code)
         : (text.toLowerCase() === code.toLowerCase())
 
