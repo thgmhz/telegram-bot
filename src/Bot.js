@@ -36,12 +36,12 @@ class Bot {
   }
 
   bindEvents() {
-    this.bot.command('startRssFeed', this.startRssFeed.bind(this))
+    this.bot.command('getFeed', this.getRssFeed.bind(this))
     this.bot.on('new_chat_members', this.onNewChatMembers.bind(this))
     this.bot.on('message', this.onNewMessage.bind(this))
   }
 
-  startRssFeed(context) {
+  getRssFeed(context) {
     context.webhookReply = false
     
     const checkItems = feed => {
@@ -55,10 +55,7 @@ class Bot {
       }
     }
 
-    const getFeed = () => rss.parseURL('https://www.rtp.pt/noticias/rss/pais').then(checkItems)
-
-    getFeed()
-    setInterval(() => getFeed(), 3600000)
+    rss.parseURL('https://www.rtp.pt/noticias/rss/pais').then(checkItems)
   }
 
   getRandomCaptcha() {
