@@ -1,11 +1,20 @@
 const { Composer } = require('micro-bot')
-const Telegraf = require('telegraf')
+const { Telegraf } = require('telegraf')
 const path = require('path')
 
 const captchaList = require('./captcha')
 
 class Bot {
-  constructor({ token, isDev }) {
+  constructor(params) {
+    const {
+      token,
+      isDev,
+      botUsername,
+      maxAttempts,
+      captchaTimeout,
+      sensitiveCase,
+    } = params
+
     this.bot = isDev
       ? new Telegraf(token)
       : new Composer
@@ -13,25 +22,22 @@ class Bot {
     if (isDev) this.bot.launch()
 
     this.isDev = isDev
-    this.maxAttempts = 3
-    this.strictCase = false
     this.usersBlacklist = []
-    this.captchaTimeout = 180000
+    this.botUsername = botUsername
+    this.maxAttempts = maxAttempts || 3
+    this.captchaTimeout = captchaTimeout || 180000
+    this.sensitiveCase = sensitiveCase
+
+    this.bindEvents()
   }
 
-  init({ username, maxAttempts, captchaTimeout, strictCase }) {
-    this.botUsername = username
-    this.maxAttempts = maxAttempts || this.maxAttempts
-    this.captchaTimeout = captchaTimeout || this.captchaTimeout
-    this.strictCase = strictCase
-
+  bindEvents() {
     this.bot.on('new_chat_members', this.onNewChatMembers.bind(this))
     this.bot.on('message', this.onNewMessage.bind(this))
   }
 
   getRandomCaptcha() {
     const randomNumber = Math.floor(Math.random() * captchaList.length) + 0
-
     return captchaList[randomNumber]
   }
 
@@ -84,10 +90,8 @@ class Bot {
   updateUserMessages({ userId, messagesIds }) {
     const user = this.getUserFromBlacklist(userId)
 
-    user.messages = [
-      ...user.messages,
-      ...messagesIds,
-    ]
+    const messages = user.messages.concat(messagesIds)
+    user.messages = messages
 
     this.usersBlacklist = this.usersBlacklist.map(usr => 
       usr.id === userId
@@ -133,7 +137,9 @@ class Bot {
   }
 
   async newAttempt({ context, user, messageId }) {
-    user.attempt += 1
+    context.webhookReply = false
+
+    user.attempt--
     const canTryAgain = (user.attempt < this.maxAttempts)
 
     if (!canTryAgain) {
@@ -161,7 +167,7 @@ class Bot {
       message: this.attemptFailMessage,
     })
 
-    const failMessage = await context.reply(attemptFail)
+    const failMessage = await context.telegram.sendMessage(context.message.chat.id, attemptFail)
     
     this.updateUserAttempts({
       userId: user.id,
@@ -178,6 +184,8 @@ class Bot {
   }
 
   async onNewChatMembers(context) {
+    context.webhookReply = false
+
     const { message } = context
     const { new_chat_participant } = message
     const { id, first_name, last_name, username } = new_chat_participant
@@ -207,7 +215,7 @@ class Bot {
     this.addUserToBlacklist({
       ...user,
       captcha,
-      attempt: 0,
+      attempt: this.maxAttempts,
       messages: [welcome.message_id]
     })
 
@@ -239,7 +247,7 @@ class Bot {
       const { captcha } = userInBlacklist
       const { code } = captcha
 
-      const userSolvedCaptcha = this.strictCase
+      const userSolvedCaptcha = this.sensitiveCase
         ? (text === code)
         : (text.toLowerCase() === code.toLowerCase())
 

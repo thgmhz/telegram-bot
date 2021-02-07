@@ -5,7 +5,14 @@ const Bot = require('./Bot.js')
 const token = process.env.BOT_TOKEN
 const isDev = process.argv[2] === 'isDev'
 
-const bot = new Bot({ token, isDev })
+const bot = new Bot({ 
+  token,
+  isDev,
+  botUsername: 'TugaBot_bot',
+  captchaTimeout: 60000 * 5,
+  maxAttempts: 3,
+  sensitiveCase: false,
+})
 
 bot.setMessages({
   welcome: 'Olá $firstname!\n\nATENÇÃO: Para garantir que você não é um robô de spam, envie uma mensagem com as letras e números que aparecem na imagem acima.\n\nVocê tem 3 tentativas.\n\nSe as tentativas não forem feitas dentro de 5 minutos você será removido(a) do grupo automaticamente.\n\n$username',
@@ -13,13 +20,6 @@ bot.setMessages({
   attemptFail: '$firstname, código inválido! Você tem mais $attemptCount tentativas.',
   attemptsOver: '🚨 $firstname não digitou o código corretamente e foi removido(a).',
   captchaSuccess: '👍 Ok, $firstname não é um robô spam.\n\n$firstname, seja bem-vindo(a)!\n\nNão esqueça de ler as regras na mensagem fixada no topo do grupo.'
-})
-
-bot.init({
-  username: 'TugaBot_bot',
-  captchaTimeout: 60000 * 5,
-  maxAttempts: 3,
-  strictCase: false,
 })
 
 module.exports = bot
