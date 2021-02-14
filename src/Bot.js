@@ -71,7 +71,7 @@ class Bot {
   parseMessage({ user, message }) {
     let msg = this.replaceAll(message, '$firstname', user.first_name)
     msg = this.replaceAll(msg, '$lastname', user.last_name || '')
-    msg = this.replaceAll(msg, '$username', `@${user.username}` || '')
+    msg = this.replaceAll(msg, '$username', user.username ? `@${user.username}` : '')
     msg = this.replaceAll(msg, '$attemptCount', user.attempt)
 
     return msg
