@@ -1,9 +1,8 @@
 const { Composer } = require('micro-bot')
 const Telegraf = require('telegraf')
-const RssParser = require('rss-parser')
 const path = require('path')
 
-const rss = new RssParser()
+const cron = require('./cron')
 
 const captchaList = require('./captcha')
 
@@ -36,7 +35,7 @@ class Bot {
   }
 
   bindEvents() {
-    this.bot.command('getFeed', this.getRssFeed.bind(this))
+    this.bot.command('startCron', context => cron.start(context))
     this.bot.on('new_chat_members', this.onNewChatMembers.bind(this))
     this.bot.on('message', this.onNewMessage.bind(this))
   }
@@ -45,17 +44,10 @@ class Bot {
     context.webhookReply = false
     
     const checkItems = feed => {
-      const { items } = feed      
-      const link = items[0].link
-
-      if (!this.postedLinks.includes(link)) {
-        this.postedLinks.push(link)
-        context.reply('🇵🇹 Notícia de última hora')
-        context.reply(link)
-      }
+      console.log(JSON.stringify(feed, null, 2))
     }
 
-    rss.parseURL('https://www.rtp.pt/noticias/rss/pais').then(checkItems)
+    rss.parseURL('https://www.noticiasaominuto.com/rss/pais').then(checkItems)
   }
 
   getRandomCaptcha() {

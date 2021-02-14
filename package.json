@@ -12,7 +12,9 @@
   "dependencies": {
     "dotenv": "^8.2.0",
     "micro-bot": "^2.5.3",
+    "node-cron": "^2.0.3",
     "rss-parser": "^3.11.0",
+    "string-strip-html": "^8.2.0",
     "telegraf": "3.37.0"
   },
   "devDependencies": {
